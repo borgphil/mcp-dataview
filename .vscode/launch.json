@@ -40,5 +40,12 @@
       "env": { "PYTHONPATH": "${workspaceFolder}/src" },
       "console": "integratedTerminal"
     }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Server",
+      "configurations": ["REST API", "MCP Server"],
+      "stopAll": true
+    }
   ]
 }
