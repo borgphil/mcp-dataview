@@ -19,7 +19,11 @@
       "module": "app.main",
       "args": ["--mcp"],
       "cwd": "${workspaceFolder}",
-      "env": { "PYTHONPATH": "${workspaceFolder}/src" },
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "APP_LOG_LEVEL": "INFO",
+        "APP_LOG_FILE": "${workspaceFolder}/logs/mcp.log"
+      },
       "console": "integratedTerminal"
     },
     {
