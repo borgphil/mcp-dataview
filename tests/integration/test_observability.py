@@ -25,3 +25,16 @@ def test_mcp_input_and_sql_are_logged(caplog):
     messages = [record.getMessage() for record in caplog.records]
     assert any("source=mcp" in message and "SELECT c.id" in message for message in messages)
     assert any("sql statement=" in message and "parameters=" in message for message in messages)
+
+def test_application_logger_can_reuse_uvicorn_terminal_handler(monkeypatch):
+    import logging
+    from app.observability import configure_logging, LOGGER
+
+    uvicorn_logger = logging.getLogger("uvicorn.error")
+    handler = logging.StreamHandler()
+    uvicorn_logger.addHandler(handler)
+    try:
+        configure_logging()
+        assert any(getattr(item, "_restricted_sql_uvicorn", False) for item in LOGGER.handlers)
+    finally:
+        uvicorn_logger.removeHandler(handler)

@@ -14,14 +14,19 @@ def configure_logging() -> None:
     log_level = getattr(logging, level, logging.INFO)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
     LOGGER.setLevel(log_level)
-    LOGGER.propagate = True
-    if not any(getattr(handler, "_restricted_sql_console", False) for handler in LOGGER.handlers):
+    uvicorn_handlers = logging.getLogger("uvicorn.error").handlers
+    if uvicorn_handlers and not any(getattr(handler, "_restricted_sql_uvicorn", False) for handler in LOGGER.handlers):
+        uvicorn_handler = uvicorn_handlers[0]
+        uvicorn_handler._restricted_sql_uvicorn = True
+        LOGGER.addHandler(uvicorn_handler)
+    elif not any(getattr(handler, "_restricted_sql_console", False) for handler in LOGGER.handlers):
         stream = sys.stdout if os.getenv("APP_LOG_STREAM", "stderr").lower() == "stdout" else sys.stderr
         console_handler = logging.StreamHandler(stream)
         console_handler.setLevel(log_level)
         console_handler.setFormatter(formatter)
         console_handler._restricted_sql_console = True
         LOGGER.addHandler(console_handler)
+    LOGGER.propagate = True
     log_file = os.getenv("APP_LOG_FILE")
     if log_file and not any(getattr(handler, "_restricted_sql_file", False) for handler in LOGGER.handlers):
         file_path = Path(log_file)
