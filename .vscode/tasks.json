@@ -2,6 +2,15 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Tail MCP logs",
+      "type": "shell",
+      "command": "tail",
+      "args": ["-f", "${workspaceFolder}/logs/mcp.log"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
       "label": "Run REST server in terminal",
       "type": "shell",
       "command": "${workspaceFolder}/.venv/bin/python",

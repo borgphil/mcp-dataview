@@ -5,7 +5,9 @@
       "command": "${workspaceFolder}/.venv/bin/python",
       "args": ["-m", "app.main", "--mcp"],
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "APP_LOG_LEVEL": "INFO",
+        "APP_LOG_FILE": "${workspaceFolder}/logs/mcp.log"
       }
     }
   }

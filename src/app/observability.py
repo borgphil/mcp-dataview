@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+from pathlib import Path
 from time import perf_counter
 from typing import Any
 
@@ -20,6 +21,15 @@ def configure_logging() -> None:
         console_handler.setFormatter(formatter)
         console_handler._restricted_sql_console = True
         LOGGER.addHandler(console_handler)
+    log_file = os.getenv("APP_LOG_FILE")
+    if log_file and not any(getattr(handler, "_restricted_sql_file", False) for handler in LOGGER.handlers):
+        file_path = Path(log_file)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(file_path)
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(formatter)
+        file_handler._restricted_sql_file = True
+        LOGGER.addHandler(file_handler)
 
 
 def log_request(source: str, request_id: str, method: str, path: str, inputs: Any) -> None:
