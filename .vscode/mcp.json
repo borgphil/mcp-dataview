@@ -1,14 +1,8 @@
 {
   "servers": {
     "restricted-sql": {
-      "type": "stdio",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "args": ["-m", "app.main", "--mcp"],
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src",
-        "APP_LOG_LEVEL": "INFO",
-        "APP_LOG_FILE": "${workspaceFolder}/logs/mcp.log"
-      }
+      "type": "sse",
+      "url": "http://127.0.0.1:8000/mcp-sse/sse"
     }
   }
 }

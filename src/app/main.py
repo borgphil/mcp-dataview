@@ -22,7 +22,11 @@ if database_settings.sample:
 else:
     engine = create_url_engine(database_settings.url, read_only=database_settings.read_only)
 service = QueryService(registry, engine)
-app = FastAPI(title="Restricted SQL Query Server")
+app = FastAPI(
+    title="Restricted SQL Query Server",
+    docs_url="/docs",
+    redoc_url=None,
+)
 app.state.registry = registry
 app.state.service = service
 from .api.rest import query_router, views_router
@@ -36,20 +40,28 @@ async def log_rest_requests(request: Request, call_next):
     body = await request.body()
     inputs = body.decode("utf-8", errors="replace") if body else {}
     started = perf_counter()
-    log_request("rest", request_id, request.method, request.url.path, inputs)
+    source = "mcp" if request.url.path == "/mcp" or request.url.path.startswith(("/mcp/", "/mcp-sse/")) else "rest"
+    log_request(source, request_id, request.method, request.url.path, inputs)
     response = await call_next(request)
     response.headers["x-request-id"] = request_id
-    log_response("rest", request_id, response.status_code, started)
+    log_response(source, request_id, response.status_code, started)
     return response
 
 def main() -> None:
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
+def mcp_main() -> None:
+    import uvicorn
+    from .api.mcp.server import mcp
+
+    app.mount("/mcp", mcp.streamable_http_app())
+    app.mount("/mcp-sse", mcp.sse_app())
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+
 if __name__ == "__main__":
     import sys
     if "--mcp" in sys.argv:
-        from .api.mcp.server import mcp
-        mcp.run()
+        mcp_main()
     else:
         main()

@@ -2,21 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "REST API",
-      "type": "debugpy",
-      "request": "launch",
-      "module": "uvicorn",
-      "args": ["app.main:app", "--reload", "--port", "8000"],
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src",
-        "APP_LOG_LEVEL": "INFO",
-        "APP_LOG_STREAM": "stdout"
-      },
-      "console": "integratedTerminal",
-      "jinja": true
-    },
-    {
       "name": "MCP Server",
       "type": "debugpy",
       "request": "launch",
@@ -26,7 +11,7 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src",
         "APP_LOG_LEVEL": "INFO",
-        "APP_LOG_FILE": "${workspaceFolder}/logs/mcp.log"
+        "APP_LOG_STREAM": "stderr"
       },
       "console": "integratedTerminal"
     },
@@ -39,13 +24,6 @@
       "cwd": "${workspaceFolder}",
       "env": { "PYTHONPATH": "${workspaceFolder}/src" },
       "console": "integratedTerminal"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Launch Server",
-      "configurations": ["REST API", "MCP Server"],
-      "stopAll": true
     }
   ]
 }
