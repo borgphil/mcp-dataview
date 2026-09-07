@@ -15,7 +15,7 @@ uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Metadata is loaded from `config/views` at startup.
 
-Application logging records REST and MCP request inputs, request IDs, validation outcomes, execution timing, and every SQLAlchemy statement with its bound parameters. Set `APP_LOG_LEVEL=DEBUG` or `APP_LOG_LEVEL=WARNING` to adjust verbosity. Database credentials are never included in application logs.
+Application logging records REST and MCP request inputs, request IDs, validation outcomes, execution timing, and every SQLAlchemy statement with its bound parameters. Logs are explicitly sent to the console (`stderr`), including the terminal, VS Code Debug Console, and integrated terminal. Set `APP_LOG_LEVEL=DEBUG` or `APP_LOG_LEVEL=WARNING` to adjust verbosity. Database credentials are never included in application logs.
 
 ## SQLite and VS Code debugging
 

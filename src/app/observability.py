@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 from time import perf_counter
 from typing import Any
 
@@ -9,10 +10,16 @@ LOGGER = logging.getLogger("restricted_sql")
 
 def configure_logging() -> None:
     level = os.getenv("APP_LOG_LEVEL", "INFO").upper()
-    logging.basicConfig(
-        level=getattr(logging, level, logging.INFO),
-        format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    )
+    log_level = getattr(logging, level, logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+    LOGGER.setLevel(log_level)
+    LOGGER.propagate = True
+    if not any(getattr(handler, "_restricted_sql_console", False) for handler in LOGGER.handlers):
+        console_handler = logging.StreamHandler(sys.stderr)
+        console_handler.setLevel(log_level)
+        console_handler.setFormatter(formatter)
+        console_handler._restricted_sql_console = True
+        LOGGER.addHandler(console_handler)
 
 
 def log_request(source: str, request_id: str, method: str, path: str, inputs: Any) -> None:
