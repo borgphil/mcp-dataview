@@ -23,6 +23,8 @@ else:
     engine = create_url_engine(database_settings.url, read_only=database_settings.read_only)
 service = QueryService(registry, engine)
 app = FastAPI(title="Restricted SQL Query Server")
+app.state.registry = registry
+app.state.service = service
 from .api.rest import query_router, views_router
 
 app.include_router(views_router)
