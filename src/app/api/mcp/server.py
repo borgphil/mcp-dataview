@@ -1,20 +1,24 @@
 from mcp.server.fastmcp import FastMCP
 from app.main import registry, service
 from uuid import uuid4
+from app.observability import log_mcp_tool
 
 mcp = FastMCP("restricted-sql")
 
 @mcp.tool()
 def list_views() -> list[dict]:
+    log_mcp_tool("list_views", str(uuid4()), {})
     return [{"name": view.name, "description": view.description} for view in registry.list_views()]
 
 @mcp.tool()
 def describe_view(view_name: str) -> dict:
+    log_mcp_tool("describe_view", str(uuid4()), {"view_name": view_name})
     return registry.get_view(view_name).model_dump()
 
 @mcp.tool()
 def validate_query(sql: str) -> dict:
     request_id = str(uuid4())
+    log_mcp_tool("validate_query", request_id, {"sql": sql})
     try:
         plan = service.validate(sql, source="mcp", request_id=request_id)
     except (ValueError, TimeoutError) as exc:
@@ -24,6 +28,7 @@ def validate_query(sql: str) -> dict:
 @mcp.tool()
 def query(sql: str) -> dict:
     request_id = str(uuid4())
+    log_mcp_tool("query", request_id, {"sql": sql})
     try:
         return service.execute(sql, source="mcp", request_id=request_id)
     except (ValueError, TimeoutError) as exc:
