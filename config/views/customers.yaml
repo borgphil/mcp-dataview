@@ -1,0 +1,31 @@
+name: customers
+sql_view: vw_customers
+description: Customer information available to the query service.
+fields:
+  id:
+    column: customer_id
+    type: integer
+    description: Unique customer identifier
+  name:
+    column: customer_name
+    type: string
+    description: Customer name
+  country:
+    column: country_code
+    type: string
+    description: ISO country code
+  status:
+    column: customer_status
+    type: string
+    description: Current customer status
+  date_of_birth:
+    column: date_of_birth
+    type: date
+    description: Customer date of birth
+relationships:
+  investments:
+    to_view: investments
+    cardinality: one_to_many
+    column_mappings:
+      - from_field: id
+        to_field: customer_id

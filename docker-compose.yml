@@ -1,0 +1,7 @@
+services:
+  restricted-sql-server:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:////app/data/sample.db

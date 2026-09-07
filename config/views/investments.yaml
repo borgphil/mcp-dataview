@@ -1,0 +1,33 @@
+name: investments
+sql_view: vw_investments
+description: Customer investment holdings.
+fields:
+  id:
+    column: investment_id
+    type: integer
+    description: Investment identifier
+  customer_id:
+    column: customer_id
+    type: integer
+    description: Customer identifier
+  product_id:
+    column: product_id
+    type: integer
+    description: Product identifier
+  investment_value:
+    column: investment_value
+    type: decimal
+    description: Current investment value
+relationships:
+  customer:
+    to_view: customers
+    cardinality: many_to_one
+    column_mappings:
+      - from_field: customer_id
+        to_field: id
+  product:
+    to_view: products
+    cardinality: many_to_one
+    column_mappings:
+      - from_field: product_id
+        to_field: id

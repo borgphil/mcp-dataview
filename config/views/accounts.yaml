@@ -1,0 +1,25 @@
+name: accounts
+sql_view: vw_accounts
+description: Versioned customer accounts.
+fields:
+  account_id:
+    column: account_id
+    type: integer
+    description: Account identifier
+  account_version:
+    column: account_version
+    type: integer
+    description: Account version
+  customer_id:
+    column: customer_id
+    type: integer
+    description: Owner customer identifier
+relationships:
+  positions:
+    to_view: positions
+    cardinality: one_to_many
+    column_mappings:
+      - from_field: account_id
+        to_field: account_id
+      - from_field: account_version
+        to_field: account_version

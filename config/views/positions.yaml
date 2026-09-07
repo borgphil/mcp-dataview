@@ -1,0 +1,29 @@
+name: positions
+sql_view: vw_positions
+description: Positions held in versioned accounts.
+fields:
+  account_id:
+    column: account_id
+    type: integer
+    description: Account identifier
+  account_version:
+    column: account_version
+    type: integer
+    description: Account version
+  product_id:
+    column: product_id
+    type: integer
+    description: Product identifier
+  quantity:
+    column: quantity
+    type: decimal
+    description: Position quantity
+relationships:
+  account:
+    to_view: accounts
+    cardinality: many_to_one
+    column_mappings:
+      - from_field: account_id
+        to_field: account_id
+      - from_field: account_version
+        to_field: account_version

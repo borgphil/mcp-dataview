@@ -1,0 +1,27 @@
+name: products
+sql_view: vw_products
+description: Investment products available to the query service.
+fields:
+  id:
+    column: product_id
+    type: integer
+    description: Product identifier
+  name:
+    column: product_name
+    type: string
+    description: Product name
+  category:
+    column: product_category
+    type: string
+    description: Product category
+  status:
+    column: product_status
+    type: string
+    description: Product status
+relationships:
+  investments:
+    to_view: investments
+    cardinality: one_to_many
+    column_mappings:
+      - from_field: id
+        to_field: product_id

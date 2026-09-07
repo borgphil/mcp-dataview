@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "restricted-sql": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "app.main", "--mcp"]
+    }
+  }
+}
