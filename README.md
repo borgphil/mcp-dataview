@@ -15,6 +15,16 @@ uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Metadata is loaded from `config/views` at startup.
 
+## SQLite and VS Code debugging
+
+Create or repair the local sample database explicitly with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m app.database.sample_db
+```
+
+To recreate all sample tables, views, and data from scratch, add `--reset`. In VS Code, use the `Initialize SQLite Database` launch configuration or task. Use `REST API` to debug FastAPI and `MCP Server` to debug the stdio MCP process. The `Run tests` task runs the complete suite.
+
 For a production database, install the optional PostgreSQL driver with `python -m pip install -e '.[postgres]'`, set `DATABASE_URL`, and keep `DATABASE_READ_ONLY=true`. The database account must be provisioned with `SELECT` permission only on the configured physical views; the application refuses a non-read-only external configuration.
 
 Run the test suite with `PYTHONPATH=src pytest`. The development database is created at `data/sample.db`; production deployments should point the application at a read-only database account containing only the configured views.

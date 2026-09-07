@@ -23,6 +23,7 @@ postgres = ["psycopg[binary]>=3.2,<4"]
 
 [project.scripts]
 restricted-sql-server = "app.main:main"
+restricted-sql-init-db = "app.database.sample_db:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/app"]
