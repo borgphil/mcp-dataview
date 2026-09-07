@@ -11,7 +11,7 @@ def initialize_sample_database(engine: Engine, reset: bool = False) -> None:
         "CREATE TABLE IF NOT EXISTS products (product_id INTEGER PRIMARY KEY, product_name TEXT, product_category TEXT, product_status TEXT)",
         "CREATE TABLE IF NOT EXISTS investments (investment_id INTEGER PRIMARY KEY, customer_id INTEGER, product_id INTEGER, investment_value NUMERIC)",
         "CREATE TABLE IF NOT EXISTS accounts (account_id INTEGER, account_version INTEGER, customer_id INTEGER, PRIMARY KEY (account_id, account_version))",
-        "CREATE TABLE IF NOT EXISTS positions (account_id INTEGER, account_version INTEGER, product_id INTEGER, quantity NUMERIC)",
+        "CREATE TABLE IF NOT EXISTS positions (account_id INTEGER, account_version INTEGER, product_id INTEGER, quantity NUMERIC, PRIMARY KEY (account_id, account_version, product_id))",
         "CREATE VIEW IF NOT EXISTS vw_customers AS SELECT * FROM customers",
         "CREATE VIEW IF NOT EXISTS vw_products AS SELECT * FROM products",
         "CREATE VIEW IF NOT EXISTS vw_investments AS SELECT * FROM investments",
@@ -32,12 +32,50 @@ def initialize_sample_database(engine: Engine, reset: bool = False) -> None:
             connection.execute(text("DROP TABLE IF EXISTS customers"))
         for statement in statements:
             connection.execute(text(statement))
-        if connection.execute(text("SELECT COUNT(*) FROM customers")).scalar_one() == 0:
-            connection.execute(text("INSERT INTO customers VALUES (1, 'Smith Holdings', 'GB', 'active', '1980-01-01'), (2, 'Jones Family', 'US', 'active', '1975-05-10'), (3, 'Brown Ltd', 'FR', 'inactive', '1990-03-12')"))
-            connection.execute(text("INSERT INTO products VALUES (10, 'Product X', 'fund', 'active'), (11, 'Product Y', 'bond', 'active')"))
-            connection.execute(text("INSERT INTO investments VALUES (100, 1, 10, 150000), (101, 2, 10, 200000), (102, 2, 11, 50000)"))
-            connection.execute(text("INSERT INTO accounts VALUES (20, 1, 1), (20, 2, 1), (21, 1, 2)"))
-            connection.execute(text("INSERT INTO positions VALUES (20, 1, 10, 12.5), (20, 2, 11, 8), (21, 1, 10, 4)"))
+        connection.execute(text("INSERT OR IGNORE INTO customers VALUES (:id, :name, :country, :status, :date_of_birth)"), [
+            {"id": 1, "name": "Smith Holdings", "country": "GB", "status": "active", "date_of_birth": "1980-01-01"},
+            {"id": 2, "name": "Jones Family", "country": "US", "status": "active", "date_of_birth": "1975-05-10"},
+            {"id": 3, "name": "Brown Ltd", "country": "FR", "status": "inactive", "date_of_birth": "1990-03-12"},
+            *[
+                {"id": customer_id, "name": f"Customer {customer_id:03d}", "country": ["GB", "US", "FR", "DE", "ES"][customer_id % 5], "status": "inactive" if customer_id % 7 == 0 else "active", "date_of_birth": f"{1970 + customer_id % 30:04d}-01-15"}
+                for customer_id in range(4, 151)
+            ],
+        ])
+        connection.execute(text("INSERT OR IGNORE INTO products VALUES (:id, :name, :category, :status)"), [
+            {"id": 10, "name": "Product X", "category": "fund", "status": "active"},
+            {"id": 11, "name": "Product Y", "category": "bond", "status": "active"},
+            *[
+                {"id": product_id, "name": f"Product {product_id}", "category": ["fund", "bond", "equity"][product_id % 3], "status": "active" if product_id % 8 else "inactive"}
+                for product_id in range(12, 160)
+            ],
+        ])
+        connection.execute(text("INSERT OR IGNORE INTO investments VALUES (:id, :customer_id, :product_id, :value)"), [
+            {"id": 100, "customer_id": 1, "product_id": 10, "value": 150000},
+            {"id": 101, "customer_id": 2, "product_id": 10, "value": 200000},
+            {"id": 102, "customer_id": 2, "product_id": 11, "value": 50000},
+            *[
+                {"id": investment_id, "customer_id": 1 + (investment_id - 100) % 150, "product_id": 10 + (investment_id - 100) % 150, "value": 10000 + (investment_id - 100) * 1250}
+                for investment_id in range(103, 250)
+            ],
+        ])
+        connection.execute(text("INSERT OR IGNORE INTO accounts VALUES (:account_id, :version, :customer_id)"), [
+            {"account_id": 20, "version": 1, "customer_id": 1},
+            {"account_id": 20, "version": 2, "customer_id": 1},
+            {"account_id": 21, "version": 1, "customer_id": 2},
+            *[
+                {"account_id": account_id, "version": 1, "customer_id": 1 + (account_id - 22) % 150}
+                for account_id in range(22, 169)
+            ],
+        ])
+        connection.execute(text("INSERT INTO positions (account_id, account_version, product_id, quantity) SELECT :account_id, :version, :product_id, :quantity WHERE NOT EXISTS (SELECT 1 FROM positions WHERE account_id = :account_id AND account_version = :version AND product_id = :product_id)"), [
+            {"account_id": 20, "version": 1, "product_id": 10, "quantity": 12.5},
+            {"account_id": 20, "version": 2, "product_id": 11, "quantity": 8},
+            {"account_id": 21, "version": 1, "product_id": 10, "quantity": 4},
+            *[
+                {"account_id": account_id, "version": 1, "product_id": 10 + (account_id - 22) % 150, "quantity": 1 + (account_id - 22) % 20}
+                for account_id in range(22, 169)
+            ],
+        ])
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Create the local restricted-SQL SQLite database.")
