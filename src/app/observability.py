@@ -16,7 +16,8 @@ def configure_logging() -> None:
     LOGGER.setLevel(log_level)
     LOGGER.propagate = True
     if not any(getattr(handler, "_restricted_sql_console", False) for handler in LOGGER.handlers):
-        console_handler = logging.StreamHandler(sys.stderr)
+        stream = sys.stdout if os.getenv("APP_LOG_STREAM", "stderr").lower() == "stdout" else sys.stderr
+        console_handler = logging.StreamHandler(stream)
         console_handler.setLevel(log_level)
         console_handler.setFormatter(formatter)
         console_handler._restricted_sql_console = True

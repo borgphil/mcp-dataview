@@ -8,7 +8,11 @@
       "module": "uvicorn",
       "args": ["app.main:app", "--reload", "--port", "8000"],
       "cwd": "${workspaceFolder}",
-      "env": { "PYTHONPATH": "${workspaceFolder}/src" },
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "APP_LOG_LEVEL": "INFO",
+        "APP_LOG_STREAM": "stdout"
+      },
       "console": "integratedTerminal",
       "jinja": true
     },

@@ -15,7 +15,7 @@ uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Metadata is loaded from `config/views` at startup.
 
-Application logging records REST and MCP request inputs, request IDs, validation outcomes, execution timing, and every SQLAlchemy statement with its bound parameters. Logs are explicitly sent to the console (`stderr`). For REST logs in the VS Code terminal, run the `Run REST server in terminal` task or select the `REST API` debug configuration, which uses the integrated terminal. MCP stdio logs are also written to `logs/mcp.log` when launched from `.vscode/mcp.json`; run the `Tail MCP logs` task in a second terminal to watch MCP calls live. Stdout is reserved for MCP protocol messages. Set `APP_LOG_LEVEL=DEBUG` or `APP_LOG_LEVEL=WARNING` to adjust verbosity. Database credentials are never included in application logs.
+Application logging records REST and MCP request inputs, request IDs, validation outcomes, execution timing, and every SQLAlchemy statement with its bound parameters. The REST debug configuration and `Run REST server in terminal` task send application logs to standard output in that same VS Code terminal. MCP stdio logs remain on `stderr` and are also written to `logs/mcp.log`, because stdout is reserved for MCP protocol messages; run the `Tail MCP logs` task to watch those calls live. Set `APP_LOG_LEVEL=DEBUG` or `APP_LOG_LEVEL=WARNING` to adjust verbosity. Database credentials are never included in application logs.
 
 ## SQLite and VS Code debugging
 

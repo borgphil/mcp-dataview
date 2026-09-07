@@ -15,7 +15,7 @@
       "type": "shell",
       "command": "${workspaceFolder}/.venv/bin/python",
       "args": ["-m", "uvicorn", "app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000", "--log-level", "info"],
-      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONPATH": "${workspaceFolder}/src", "APP_LOG_LEVEL": "INFO" } },
+      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONPATH": "${workspaceFolder}/src", "APP_LOG_LEVEL": "INFO", "APP_LOG_STREAM": "stdout" } },
       "isBackground": true,
       "problemMatcher": []
     },
