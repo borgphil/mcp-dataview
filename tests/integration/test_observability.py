@@ -2,7 +2,15 @@ import logging
 
 from fastapi.testclient import TestClient
 from app.api.mcp.server import query as mcp_query
+from app.database.engine import _should_log_sql
 from app.main import app
+
+
+def test_sqlite_schema_introspection_is_filtered():
+    assert not _should_log_sql("SELECT name FROM sqlite_master WHERE type='table'")
+    assert not _should_log_sql("SELECT * FROM sqlite_master WHERE name = 'customers'")
+    assert not _should_log_sql("PRAGMA table_info('customers')")
+    assert _should_log_sql("SELECT c.id FROM customers c LIMIT 1")
 
 
 def test_rest_request_input_and_sql_are_logged(caplog):
