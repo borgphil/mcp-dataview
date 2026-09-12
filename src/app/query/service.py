@@ -1,12 +1,14 @@
 import logging
-from time import perf_counter
-from time import monotonic
+from time import monotonic, perf_counter
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 
 from app.metadata.registry import MetadataRegistry
-from app.sql.validator import RestrictedSqlValidator, QueryPlan
 from app.sql.compiler import SqlAlchemyCompiler
-from sqlalchemy.engine import Engine
+from app.sql.validator import QueryPlan, RestrictedSqlValidator
+
+logger = logging.getLogger(__name__)
+
 
 class QueryService:
     def __init__(self, registry: MetadataRegistry, engine: Engine, max_result_size: int = 1000,
@@ -23,12 +25,12 @@ class QueryService:
         try:
             plan = self.validator.validate(sql)
         except ValueError as exc:
-            logging.getLogger(__name__).warning(
+            logger.warning(
                 "query rejected source=%s request_id=%s error_code=%s",
                 source, request_id, getattr(exc, "code", "INVALID_SQL"),
             )
             raise
-        logging.getLogger(__name__).info(
+        logger.info(
             "query validated source=%s request_id=%s root_view=%s complexity=%s",
             source, request_id, plan.root_view, plan.complexity,
         )
@@ -36,6 +38,7 @@ class QueryService:
 
     def execute(self, sql: str, source: str = "unknown", request_id: str | None = None) -> dict:
         started = perf_counter()
+        logger.info("executing query sql=%s", sql)
         plan = self.validate(sql, source=source, request_id=request_id)
         statement = self.compiler.compile(plan)
         normalized_query = str(statement.compile(dialect=self.engine.dialect))
@@ -56,8 +59,8 @@ class QueryService:
             finally:
                 if hasattr(raw_connection, "set_progress_handler"):
                     raw_connection.set_progress_handler(None, 0)
-        logging.getLogger(__name__).info(
-            "query executed source=%s request_id=%s root_view=%s normalized_query=%s result_count=%d duration_ms=%.2f complexity=%s",
-            source, request_id, plan.root_view, normalized_query, len(rows), (perf_counter() - started) * 1000, plan.complexity,
+        logger.info(
+            "query executed result_count=%d duration_ms=%.2f",
+            len(rows), (perf_counter() - started) * 1000,
         )
         return {"columns": list(rows[0]) if rows else [], "rows": rows, "count": len(rows)}

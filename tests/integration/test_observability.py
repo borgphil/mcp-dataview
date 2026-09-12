@@ -34,6 +34,20 @@ def test_mcp_input_and_sql_are_logged(caplog):
     assert any("source=mcp" in message and "SELECT c.id" in message for message in messages)
     assert any("sql statement=" in message and "parameters=" in message for message in messages)
 
+
+def test_query_service_execution_logs_input_sql_and_results(caplog):
+    caplog.set_level(logging.INFO, logger="app.query.service")
+    response = TestClient(app).post(
+        "/api/query",
+        headers={"x-request-id": "service-log-test"},
+        json={"sql": "SELECT c.id FROM customers c LIMIT 1"},
+    )
+    assert response.status_code == 200
+    messages = [record.getMessage() for record in caplog.records]
+    assert any("executing query" in message and "SELECT c.id FROM customers c LIMIT 1" in message for message in messages)
+    assert any("query executed" in message and "result_count=1" in message and "duration_ms=" in message for message in messages)
+
+
 def test_application_logger_can_reuse_uvicorn_terminal_handler(monkeypatch):
     import logging
     from app.observability import configure_logging, LOGGER
